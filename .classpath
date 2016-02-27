@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="src/" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/mac/Desktop/javaCv/javacv-linux-x86_64.jar"/>
+	<classpathentry kind="lib" path="/Users/mac/Desktop/javaCv/javacv-linux-x86.jar"/>
+	<classpathentry kind="lib" path="/Users/mac/Desktop/javaCv/javacv-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="/Users/mac/Desktop/javaCv/javacv-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="/Users/mac/Desktop/javaCv/javacv-windows-x86.jar"/>
+	<classpathentry kind="lib" path="/Users/mac/Desktop/javaCv/javacv.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

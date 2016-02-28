@@ -1,10 +1,15 @@
 package edu.orissermaroix.phash64;
 
-import javax.imageio.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
-import java.awt.*;
-import java.awt.image.*;
-import java.io.*;
+import javax.imageio.ImageIO;
+
 
 public class PHash64 {
 	/**
@@ -36,34 +41,85 @@ public class PHash64 {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static long computeHash(String imagePath) throws FileNotFoundException, IOException {
+	public static long computeHash(String imagePath) 
+			throws FileNotFoundException, IOException {
+		final int SIZE = 8;
+		
 		//process image
 		BufferedImage bim = ImageIO.read(new FileInputStream(imagePath));
-		Image resizedImg = bim.getScaledInstance(8, 8, Image.SCALE_FAST);
-		BufferedImage rBimg = new BufferedImage(8, 8, bim.getType());
+		Image resizedImg = bim.getScaledInstance(SIZE, SIZE, Image.SCALE_FAST);
+		BufferedImage rBimg = new BufferedImage(SIZE, SIZE, bim.getType());
 
 		//draw image
 		Graphics2D g = rBimg.createGraphics();
 		g.drawImage(resizedImg, 0, 0, null);
-		g.dispose();
+		g.dispose(); //optionnal... work without...
 
-		long avg = 0;
-		int[][] img = new int[8][8];
-		for (int i = 0; i < 8; i++)
-			for (int j = 0; j < 8; j++) {
+		int avg = 0;
+		int[] img = new int[SIZE * SIZE];
+		for (int i = 0; i < SIZE; i++)
+			for (int j = 0, k; j < SIZE; j++) {
+				k = i * SIZE + j;
 				Color c = new Color(rBimg.getRGB(i, j));
-				img[i][j] = (int) ((c.getRed() + c.getGreen() + c.getBlue()) / 3);
-				avg += img[i][j];
+				img[k] = (c.getRed() + c.getGreen() + c.getBlue()) / 3;
+				avg += img[k];
 			}
-
-		avg /= 64;
+		avg /= (SIZE * SIZE);
 
 		//create the hash
 		long hash = 0;
-		for (int i = 0; i < 8; i++)
-			for (int j = 0; j < 8; j++)
-				hash = hash << 1 | (img[i][j] > avg ? 1 : 0);
-
+		for (int i = 0; i < SIZE * SIZE; i++)
+			hash = hash << 1 | (img[i] > avg ? 1 : 0);
+		
 		return hash;
+	}
+	
+	/**
+	 * Some tests...
+	 * 
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	protected static void demo() throws FileNotFoundException, IOException {
+		long a = computeHash("res/a.jpg");
+		long b = computeHash("res/b.jpg");
+		long c = computeHash("res/c.jpg");
+		
+		System.out.println(hamming(a, a)); //a & a are same
+		System.out.println(hamming(a, b)); //a & b are similar
+		System.out.println(hamming(a, c)); //a & c are different
+		System.out.println(hamming(c, b)); //b & c are different
+		System.out.println(hamming(b, c)); //commutativity
+	}
+	
+	/**
+	 * This function display how to use this class from command line.
+	 */
+	protected static void usage() {
+		System.out.println("Usage : ");
+		System.out.println("java edu.orissermaroix.phash64.PHash64 hash <img_path>");
+		System.out.println("java edu.orissermaroix.phash64.PHash64 distance <img_path1> <img_path2>");
+	}
+	
+	/**
+	 * This function is used for using this class from the command line.
+	 * 
+	 * @param args
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static void main(String[] args) 
+			throws FileNotFoundException, IOException{
+		try {
+			String cmd = args[0];
+			if (cmd.equals("demo"))
+				demo();
+			else if (cmd.equals("hash"))
+				System.out.println(computeHash(args[1]));
+			else if (cmd.equals("distance"))
+				System.out.println(hamming(computeHash(args[1]), computeHash(args[2])));
+		} catch (ArrayIndexOutOfBoundsException e) {
+			usage();
+		}
 	}
 }
